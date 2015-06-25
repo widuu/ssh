@@ -1,19 +1,27 @@
-
-# VERSION 0.0.1
-# 默认ubuntu server长期支持版本，当前是12.10
-FROM ubuntu
+FROM centos:6
 # 签名啦
 MAINTAINER widuu "admin@widuu.com"
 
-# 更新源，安装ssh server
-RUN echo "deb http://archive.ubuntu.com/ubuntu precise main universe"> /etc/apt/sources.list
-RUN apt-get update
-RUN apt-get install -y openssh-server
-RUN mkdir -p /var/run/sshd
+RUN yum install -y passwd
+RUN yum install -y openssh
+RUN yum install -y openssh-server
+RUN yum install -y openssh-clients
+RUN yum install -y sudo
 
-# 设置root ssh远程登录密码为123456
-RUN echo "root:123456" | chpasswd 
+RUN sed -ri "s/^UsePAM yes/#UsePAM yes/" /etc/ssh/sshd_config
+RUN sed -ri "s/^#UsePAM no/UsePAM no/" /etc/ssh/sshd_config
+RUN /etc/init.d/sshd start
+RUN /etc/init.d/sshd stop
 
+RUN echo "root:dgj99349" | chpasswd
+
+EXPOSE 22
+
+EXPOSE 80
+
+EXPOSE 443
+
+EXPOSE 3306
 
 # SSH终端服务器作为后台运行
-ENTRYPOINT /usr/sbin/sshd -D
+CMD ["/usr/sbin/sshd", "-D"]
